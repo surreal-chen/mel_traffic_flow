@@ -1129,7 +1129,9 @@ map.on('load', function() {
     
     //update map and chart
     filterBy()
-    updateChart()
+    if (chart_status != 0) {
+      updateChart()
+    }
   });
 })
 
