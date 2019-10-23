@@ -1,0 +1,1231 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta charset='utf-8' />
+<script src='https://api.mapbox.com/mapbox-gl-js/v0.48.0/mapbox-gl.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v0.48.0/mapbox-gl.css' rel='stylesheet' />
+<script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js'></script>
+<script src='https://d3js.org/d3.v5.min.js'></script>
+</head>
+<body>
+
+<style>
+#map-title {
+  position: absolute;
+  top: 0%;
+  height: 5%;
+  width: 65%;
+  text-align: center;
+
+}
+
+h1 {
+  margin: 0px;
+  font: Garamond, serif;
+}
+
+#map {
+  position: absolute;
+  top: 5%;
+  bottom: 5%;
+  width: 65%;
+}
+
+.map-overlay {
+  position: absolute;
+  top: 10%;
+  left: 0;
+  opacity: 0.9;
+}
+
+.map-overlay .map-overlay-title {
+  background-color: #fff;
+}
+
+.map-overlay .map-overlay-inner {
+  position: absolute;
+  top: 10px;
+  width: 250px;
+  left: 20px;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
+  border-radius: 3px;
+  padding: 10px;
+  margin-bottom: 10px;
+
+}
+
+.map-overlay-inner fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 10px;
+
+}
+
+.map-overlay-inner fieldset:last-child {
+  margin: 0;
+}
+
+.map-overlay-inner div {
+  display: inline-block;
+}
+
+.map-overlay-inner input:hover {
+  cursor: pointer
+}
+
+.map-overlay-inner select {
+  width: 100%;
+  cursor: pointer
+}
+
+.map-overlay-inner label {
+  font-weight: bold;
+  margin: 0 0 5px;
+  font: 12px/20px Garamond, Georgia, serif;
+}
+
+/* not work */
+.map-overlay-inner slider {
+  width: 100%;
+}
+
+.map-overlay-inner button {
+  width: 36px;
+  height: 20px;
+  border: none;
+  margin: 0 5px;
+  cursor: pointer
+}
+
+/* 22-10-2019 add css for popup */
+.mapboxgl-popup {
+  max-width: 200px;
+}
+
+/* 22-10-2019 change css for popup */
+.mapboxgl-popup-content {
+  background-color: #ffffff;
+  padding: 3px;
+  text-align: center;
+  font-size: 12px;
+  box-shadow: 3px 3px 2px #ddd9d9;
+}
+
+#time {
+  display: inline-block;
+  width: 40px;
+  vertical-align: middle;
+  font-size: 16px;
+}
+
+#slider {
+  display: inline-block;
+  width: 180px;
+  margin: 5px;
+}
+
+#chart-title {
+  position: absolute;
+  right: 0%;
+  top: 5%;
+  height: 5%;
+  width: 35%;
+  text-align: center
+}
+
+#chart-title-content {
+  margin: 2px
+}
+
+#chart {
+  position: absolute;
+  top: 10%;
+  height: 35%;
+  right: 0%;
+  width: 33%;
+}
+
+.chart-overlay {
+  font: 12px/20px Garamond, Georgia, serif;
+  position: absolute;
+  top: 8%;
+  right: 8%;
+  opacity: 0.9;
+}
+
+.chart-overlay .chart-overlay-inner {
+  position: absolute;
+  top: 2px;
+  width: 110px;
+  left: 2px;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
+  border-radius: 3px;
+  padding: 10px;
+  margin-bottom: 2px;
+  font: Garamond, serif;
+}
+
+.chart-overlay-inner fieldset {
+  border: none;
+  padding: 0;
+}
+
+.chart-overlay-inner fieldset:last-child {
+  margin: 0;
+}
+
+.chart-overlay-inner input:hover {
+  cursor: pointer
+}
+
+.chart-overlay-inner .active {
+  background: #35978f;
+  font-weight: bold;
+}
+
+.chart-overlay-inner .invisible {
+  display: none
+}
+
+.chart-overlay-inner nav:last-child {
+  margin: 0;
+}
+
+#summaryMap {
+  position: absolute;
+  top: 45%;
+  bottom: 5%;
+  right: 0%;
+  width: 33%;
+}
+
+#bottom {
+  position: absolute;
+  bottom: 0%;
+  height: 5%;
+  text-align: center
+}
+
+.summarymap-overlay {
+  position: absolute;
+  bottom: 35%;
+  left: 0%;
+  background: rgba(255, 255, 255, 0.8);
+  font: Garamond, serif;
+  overflow: auto;
+  border-radius: 3px;
+}
+
+#summarymaplegend {
+  padding: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  line-height: 18px;
+
+  left: 92%;
+  margin-bottom: 40px;
+  width: 100px;
+}
+
+.summarymaplegend-key {
+  display: inline-block;
+  border-radius: 20%;
+  width: 10px;
+  height: 10px;
+  margin-right: 5px;
+
+}
+
+#summarymaptitle {
+  top: 47%;
+  left: 75%;
+  height: 50px;
+  padding: 0px;
+  width: 220px;
+}
+
+h3 {
+  display: inline;
+  font: Garamond, serif;
+}
+
+h4 {
+  margin: 10px;
+  font-size: 1.1em;
+  text-align: left;
+  font: Garamond, serif;
+}
+
+
+</style>
+<div id='map-title'>
+  <h1>
+    Hourly Traffic Flow Map of Melbourne City
+  </h1>
+</div>
+
+<div id='map'></div>
+<div class='map-overlay'>
+  <div class='map-overlay-inner'>
+    <fieldset>
+      <label>Select Day of Week</label>
+      <select id='dow' name='week'>
+        <option value=1>Monday</option>
+        <option value=2>Tuesday</option>
+        <option value=3>Wednesday</option>
+        <option value=4>Thursday</option>
+        <option value=5>Friday</option>
+        <option value=6>Saturday</option>
+        <option value=7>Sunday</option>
+      </select>
+    </fieldset>
+    <fieldset>
+      <label>Select Period Type</label>
+      <select id='type' name='periodType'>
+        <option value=1>School Term</option>
+        <option value=2>School Holiday</option>
+        <option value=3>Public Holiday</option>
+      </select>
+    </fieldset>
+    <fieldset id='group'>
+      <input id='reverse' type='radio' name='direction' value=1 checked>
+      <label for='reverse'>Inbound</label>
+      <input id='forward' type='radio' name='direction' value=0>
+      <label for='forward'>Outbound</label>
+    </fieldset>
+    <fieldset>
+      <label id='time'>8AM</label>
+      <input id='slider' type='range' class='row' min='0' max='23' step='1' value='8' />
+    </fieldset>
+    <fieldset>
+      <div id='buttons'></div>
+    </fieldset>
+  </div>
+</div>
+
+<div id='chart-title'>
+  <h3 id='chart-title-content'>
+    Traffic Flow Analysis Chart
+  </h3>
+  <h3 id='road-name'>
+  </h3>
+</div>
+
+<div id='chart'>
+  <canvas id="myChart"></canvas>
+</div>
+<div class='chart-overlay top'>
+  <div class='chart-overlay-inner'>
+    <fieldset>
+      <input type='button' id='timeMode' value='Time'>
+      <input type='button' id='typeMode' value='Type'>
+    </fieldset>
+    <fieldset id='time_type' class='invisible'>
+      <input id='day' type='radio' name='time_type' value=0 checked>
+      <label for='day'>Hourly</label>
+      <br><input id='week' type='radio' name='time_type' value=1>
+      <label for='week'>Daily</label>
+    </fieldset>
+    <fieldset id='period_type' class='invisible'>
+      <input id='stacked' type='radio' name='period_type' value=0 checked>
+      <label for='stacked'>Stacked</label>
+      <br><input id='avg' type='radio' name='period_type' value=1>
+      <label for='avg'>Overall Average</label>
+    </fieldset>
+  </div>
+</div>
+
+<div id='summaryMap'></div>
+
+<div id='bottom'>
+  * traffic flow unit: pc/h
+</div>
+<div class='summarymap-overlay' id='summarymaplegend'></div>
+
+
+
+<script>
+mapboxgl.accessToken = "pk.eyJ1Ijoibm9yYXh1IiwiYSI6ImNqemlnaHV0YTE0czIzbm5ya2t4bjlhbGwifQ.XiRdoGvrSBbxXAakPnY67Q"
+var gjson_path = "https://raw.githubusercontent.com/surreal-chen/mel_traffic_flow/master/sub_combined_traffic_flow.geojson"
+var csv_path = "https://raw.githubusercontent.com/surreal-chen/mel_traffic_flow/master/sub_combined_traffic_flow.csv"
+//set chart font
+Chart.defaults.global.defaultFontFamily = 'Garamond'
+
+//boundary of Victoria
+var bounds = [
+  [138.906644, -40.325114],
+  [150.851908, -33.341905]
+]
+
+var map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/light-v9',
+  center: [144.92, -37.815],
+  zoom: 12,
+  maxBounds: bounds
+});
+
+//global variables of map
+var interval = [0, 500, 1000]; //flow interval
+var map_colors = ['#01665e', '#d87600', '#543005']; //map features color
+var intervalLgd = ['0~500', '501~1000', '>1000'] //flow legend
+var hoveredId = null; //global var to store hovered feature id
+var clickedId = null; //global var to store clicked feature id
+var lgdOn = null; //global var to store which legend button has been clicked
+var layers = [] //to store layers named after time
+var popup = new mapboxgl.Popup({
+  closeButton: false,
+  closeOnClick: true
+})
+
+//global chart variables
+var ctx = document.getElementById('myChart').getContext('2d');
+var global_chart = null //global var to store chart object
+var chart_status = 0 //global var to record chart type
+var csv_file = d3.csv(csv_path) //read csv from url link
+var time_labels = [] //to store time labels for hourly chart
+var type_labels = ['School Term', 'School Holiday', 'Public Holiday']
+var week_labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+var seven_colors = ['#543005', '#8c510a', '#a6611a', '#bf812d', '#d8b365', '#80cdc1', '#01665e'] //colors used for stacked chart
+var two_colors = ['#5ab4ac', '#d8b365'] //colors used for average chart
+var flow = []; //global var to store flow data
+var time_btn = document.getElementById("timeMode")
+var type_btn = document.getElementById("typeMode")
+var time_field = document.getElementById("time_type")
+var type_field = document.getElementById("period_type")
+var clickedFeature = '' //global var to store clicked feature's HMGNS code
+var road_name = '' //global var to store clicked road name
+
+//global summary map var
+//ningran
+var summarymap = new mapboxgl.Map({
+  container: 'summaryMap',
+  style: 'mapbox://styles/noraxu/ck0w820gb0g3q1cmrqhwfl37h',
+  center: [144.94, -37.8065],
+  pitch: 50, // pitch in degrees
+  zoom: 16,
+  maxBounds: bounds
+});
+
+//below functions used to retrieve real time value of map elements
+function getLayer() {
+  return document.getElementById('slider').value + '_00'
+}
+
+function getDOW() {
+  return parseInt(document.getElementById('dow').value);
+}
+
+function getPeriodType() {
+  return parseInt(document.getElementById('type').value);
+}
+
+function getDir() {
+  return (document.getElementById('reverse').checked === true) ? 1 : 0
+}
+
+//below functions used to set filters to each element on map
+function filterDOW() {
+  return ['==', 'DOW', getDOW()]
+}
+
+function filterType() {
+  return ['==', 'TYPE', getPeriodType()]
+}
+
+function filterDir() {
+  return ['==', 'LRS_ROAD_D', getDir()]
+}
+
+//this function updates map day of week, type and direction
+function filterBy() {
+  map.setFilter(getLayer(), ['all', filterDOW(), filterType(), filterDir()])
+}
+
+//to shift feature state
+function hoverMode(idType, bool) {
+  map.setFeatureState({
+    source: "trafficFlow",
+    id: idType
+  }, {
+    hover: bool
+  })
+}
+
+//below functions used to retrieve real time values of chart elements
+//this function checks status of radio 'day' and return 0 if it is checked, 1 if not
+function getTimeType() {
+  return (document.getElementById('day').checked === true) ? 0 : 1
+}
+
+function getType() {
+  return (document.getElementById('stacked').checked === true) ? 0 : 1
+}
+
+//this function shifts to time mode menu, showing hourly and daily radios and hides type mode
+function timeMode() {
+  type_btn.className = ''
+  time_btn.className = 'active'
+  type_field.className = 'invisible'
+  time_field.className = ''
+}
+
+//this function shifts to type mode menu, showing overall average and stacked radios and hides time mode
+function typeMode() {
+  time_btn.className = ''
+  type_btn.className = 'active'
+  time_field.className = 'invisible'
+  type_field.className = ''
+}
+
+//to add commas to axis of charts
+var numberWithCommas = function(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
+//below functions used to initialize charts and titles while shifted from another type or from the beginning state
+//create an initial hourly chart
+function initDayChart() {
+  if (global_chart != null) {
+    global_chart.destroy()
+  }
+
+  document.getElementById('chart-title-content').innerHTML = "Hourly Traffic Flow Chart of ",
+
+    flow = []
+  csv_file.then(function(data) {
+    data.forEach(function(d) {
+      if (d.HMGNS_FLOW == clickedFeature && d.TYPE == getPeriodType() && d.DOW == getDOW()) {
+        layers.forEach(function(layer) {
+          flow.push(d[layer])
+        })
+      }
+    })
+
+    global_chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: time_labels,
+        datasets: [{
+          label: 'hourly flow',
+          backgroundColor: two_colors[1],
+          data: flow
+        }]
+      },
+      options: {
+        legend: {
+          display: false
+        },
+        tooltips: {
+          displayColors: false
+        },
+        scales: {
+          yAxes: [{
+            ticks: {
+              suggestedMin: 0,
+              callback: function(f) {
+                return numberWithCommas(f)
+              }
+            }
+          }]
+        },
+        animation: {
+          easing: 'easeInOutSine',
+          duration: 500
+        }
+      }
+    });
+  })
+}
+
+//create an initial daily chart
+function initWeekChart() {
+  if (global_chart != null) {
+    global_chart.destroy()
+  }
+
+  document.getElementById('chart-title-content').innerHTML = "Daily Traffic Flow Chart of "
+
+  var l = getLayer()
+  flow = []
+  csv_file.then(function(data) {
+    data.forEach(function(d) {
+      if (d.HMGNS_FLOW == clickedFeature && d.TYPE == getPeriodType()) {
+        flow.push(d[l])
+      }
+    })
+
+    global_chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: week_labels,
+        datasets: [{
+          label: 'daily flow',
+          backgroundColor: two_colors[0],
+          data: flow,
+        }]
+      },
+      options: {
+        scales: {
+          yAxes: [{
+            ticks: {
+              suggestedMin: 0,
+              callback: function(f) {
+                return numberWithCommas(f)
+              }
+            }
+          }]
+        },
+        legend: {
+          display: false
+        },
+        tooltips: {
+          displayColors: false
+        },
+        animation: {
+          easing: 'easeInOutSine',
+          duration: 500
+        }
+      }
+    });
+  })
+}
+
+//create an initial overall average chart
+function initAvgChart() {
+  if (global_chart != null) {
+    global_chart.destroy()
+  }
+
+  document.getElementById('chart-title-content').innerHTML = "Average Traffic Flow Chart of "
+
+  flow = []
+  //create a 3*2 list to store weekday and weekend flow separately for each period type
+  var temp = [
+    [],
+    [],
+    [],
+    [],
+    [],
+    []
+  ]
+  var wkd_flow = []
+  var wke_flow = []
+  csv_file.then(function(data) {
+    data.forEach(function(d) {
+      if (d.HMGNS_FLOW == clickedFeature) {
+        var weekdayPos = (parseInt(d.TYPE) - 1) * 2
+        var weekendPos = parseInt(d.TYPE) * 2 - 1
+        if (d.DOW <= 5) {
+          temp[weekdayPos].push(d.total)
+        } else {
+          temp[weekendPos].push(d.total)
+        }
+      }
+    })
+
+    for (i = 0; i < temp.length; i++) {
+      var avg = temp[i].reduce((a, b) => parseInt(a) + parseInt(b), 0) / temp[i].length
+      if (i % 2 == 0) {
+        wkd_flow.push(avg)
+      } else [
+        wke_flow.push(avg)
+      ]
+    }
+    
+    global_chart = new Chart(ctx, {
+      type: 'horizontalBar',
+      data: {
+        labels: type_labels,
+        datasets: [{
+            label: 'weekday',
+            backgroundColor: two_colors[0],
+            data: wkd_flow
+          },
+          {
+            label: 'weekend',
+            backgroundColor: two_colors[1],
+            data: wke_flow
+          }
+        ]
+      },
+      options: {
+        scales: {
+          xAxes: [{
+            ticks: {
+              suggestedMin: 0,
+              callback: function(f) {
+                return numberWithCommas(f)
+              }
+            }
+          }],
+
+        },
+        legend: {
+          onHover: function(e) {
+            e.target.style.cursor = 'pointer';
+          },
+        },
+        hover: {
+          onHover: function(e) {
+            e.target.style.cursor = ''
+          }
+        },
+        tooltips: {
+          displayColors: false
+        },
+        animation: {
+          easing: 'easeInOutSine',
+          duration: 500
+        }
+      }
+    });
+  })
+}
+
+//create an initial stacked chart
+function initStackedChart() {
+  if (global_chart != null) {
+    global_chart.destroy()
+  }
+
+  document.getElementById('chart-title-content').innerHTML = "Stacked Traffic Flow Chart of "
+
+  flow = []
+  var temp = []
+  var temp_after = []
+  for (i = 0; i < 7; i++) {
+    temp.push([])
+    temp_after.push([])
+    for (j = 0; j < 3; j++) {
+      temp[i].push([])
+    }
+  }
+
+  csv_file.then(function(data) {
+    data.forEach(function(d) {
+      if (d.HMGNS_FLOW == clickedFeature) {
+        var typePos = parseInt(d.TYPE) - 1
+        var weekPos = parseInt(d.DOW) - 1
+        temp[weekPos][typePos].push(d.total)
+      }
+    })
+
+//create a 7*3 list to store flow of each type to each day's list
+    var ds = []
+    for (i = 0; i < 7; i++) {
+      for (j = 0; j < 3; j++) {
+        temp_after[i].push(temp[i][j])
+      }
+      var d = {
+        label: week_labels[i],
+        backgroundColor: seven_colors[i],
+        data: temp_after[i]
+      }
+      ds.push(d)
+    }
+
+    global_chart = new Chart(ctx, {
+      type: 'horizontalBar',
+      data: {
+        labels: type_labels,
+        datasets: ds
+      },
+      options: {
+        scales: {
+          xAxes: [{
+            stacked: true,
+            ticks: {
+              callback: function(f) {
+                return numberWithCommas(f)
+              }
+            }
+          }],
+          yAxes: [{
+            stacked: true
+          }]
+        },
+        legend: {
+          onHover: function(e) {
+            e.target.style.cursor = 'pointer';
+          },
+        },
+        hover: {
+          onHover: function(e) {
+            e.target.style.cursor = ''
+          }
+        },
+        tooltips: {
+          displayColors: false
+        },
+        animation: {
+          easing: 'easeInOutSine',
+          duration: 500
+        }
+      }
+    });
+  })
+}
+
+//below functions used to update chart, interacting with map
+//update day chart
+function makeDayChart() {
+  flow = []
+  
+  csv_file.then(function(data) {
+    data.forEach(function(d) {
+      if (d.HMGNS_FLOW == clickedFeature && d.TYPE == getPeriodType() && d.DOW == getDOW()) {
+        layers.forEach(function(layer) {
+          flow.push(d[layer])
+        })
+      }
+    })
+    global_chart.data.datasets[0].data = flow;
+    global_chart.update();
+  })
+}
+
+//update week chart
+function makeWeekChart() {
+  var l = getLayer()
+  flow = []
+  
+  csv_file.then(function(data) {
+    data.forEach(function(d) {
+      if (d.HMGNS_FLOW == clickedFeature && d.TYPE == getPeriodType()) {
+        flow.push(d[l])
+      }
+    })
+    global_chart.data.datasets[0].data = flow;
+    global_chart.update();
+  })
+}
+
+//update overall average chart
+function makeAvgChart() {
+  flow = []
+  var temp = [
+    [],
+    [],
+    [],
+    [],
+    [],
+    []
+  ]
+  var wkd_flow = []
+  var wke_flow = []
+  
+  csv_file.then(function(data) {
+    data.forEach(function(d) {
+      if (d.HMGNS_FLOW == clickedFeature) {
+        var weekdayPos = (parseInt(d.TYPE) - 1) * 2
+        var weekendPos = parseInt(d.TYPE) * 2 - 1
+        if (d.DOW <= 5) {
+          temp[weekdayPos].push(d.total)
+        } else {
+          temp[weekendPos].push(d.total)
+        }
+      }
+    })
+
+    for (i = 0; i < temp.length; i++) {
+      var avg = temp[i].reduce((a, b) => parseInt(a) + parseInt(b), 0) / temp[i].length
+      if (i % 2 == 0) {
+        wkd_flow.push(avg)
+      } else [
+        wke_flow.push(avg)
+      ]
+    }
+    global_chart.data.datasets[0].data = wkd_flow;
+    global_chart.data.datasets[1].data = wke_flow;
+    global_chart.update()
+  })
+}
+
+//update stacked chart
+function makeStackedChart() {
+  flow = []
+  var temp = []
+  var temp_after = []
+  for (i = 0; i < 7; i++) {
+    temp.push([])
+    temp_after.push([])
+    for (j = 0; j < 3; j++) {
+      temp[i].push([])
+    }
+  }
+
+  csv_file.then(function(data) {
+    data.forEach(function(d) {
+      if (d.HMGNS_FLOW == clickedFeature) {
+        var typePos = parseInt(d.TYPE) - 1
+        var weekPos = parseInt(d.DOW) - 1
+        temp[weekPos][typePos].push(d.total)
+      }
+    })
+
+    var ds = []
+    for (i = 0; i < 7; i++) {
+      for (j = 0; j < 3; j++) {
+        temp_after[i].push(temp[i][j])
+      }
+      global_chart.data.datasets[i].data = temp_after[i]
+    }
+    global_chart.update()
+  })
+}
+
+//update chart according to chart status
+//0 for initial state, 1 for day chart, 2 for week chart, 3 for overall average chart, 4 for stacked chart
+function updateChart() {
+  switch (chart_status) {
+    case 0:
+      if (time_btn.className == 'active') {
+        initTimeChart()
+      } else if (type_btn.className == 'active') {
+        initTypeChart()
+      } else {
+        initDayChart()
+        timeMode()
+        chart_status = 1
+      }
+      break;
+    case 1:
+      makeDayChart()
+      break;
+    case 2:
+      makeWeekChart()
+      break;
+    case 3:
+      makeAvgChart()
+      break;
+    case 4:
+      makeStackedChart()
+      break;
+  }
+}
+
+//below functions used to select which initialization method to use while shifted between time and type mode
+function initTimeChart() {
+  if (getTimeType() == 0 && chart_status != 1) {
+    //if detect change in Day
+    initDayChart()
+    chart_status = 1
+  } else if (getTimeType() == 1 && chart_status != 2) {
+    initWeekChart()
+    chart_status = 2
+  }
+}
+
+function initTypeChart() {
+  if (getType() == 0 && chart_status != 4) {
+    //if detect change in Stacked
+    initStackedChart()
+    chart_status = 4
+  } else if (getType() == 1 && chart_status != 3) {
+    initAvgChart()
+    chart_status = 3
+  }
+}
+
+//load map
+map.on('load', function() {
+  map.addSource("trafficFlow", {
+    "type": "geojson",
+    "data": gjson_path,
+    "generateId": true
+  })
+
+  for (var i = 0; i < 24; i++) {
+    var layer = i.toString() + '_00'
+    layers.push(layer);
+    time_labels.push(i.toString() + ':00')
+
+    map.addLayer({
+      id: layer,
+      type: 'line',
+      source: "trafficFlow",
+      'layout': {
+        'visibility': 'none',
+        'line-cap': 'round'
+      },
+      "paint": {
+        "line-color": {
+          property: layer, //style maps based on time from 0_00 to 23_00
+          type: 'interval',
+          stops: [
+            [interval[0], map_colors[0]],
+            [interval[1], map_colors[1]],
+            [interval[2], map_colors[2]]
+          ]
+        },
+        //change feature size on hover and click
+        "line-width": ["case",
+          ["boolean", ["feature-state", "hover"], false],
+          12,
+          6
+        ],
+      }
+    });
+
+    //change the style of cursor back, close popup and retore feature state when mouse moved to a blank space
+    map.on('mouseleave', layer, function() {
+      map.getCanvas().style.cursor = '';
+
+      popup.remove();
+
+//if the feature has been clicked, do not restore
+      if (hoveredId && hoveredId != clickedId) {
+        hoverMode(hoveredId, false)
+      }
+    });
+
+//change the style of cursor to pointer, add popup and shift to hover mode when mouse moved to a feature
+    map.on('mouseenter', layer, function(e) {
+      var hoverLayer = e.features[0].properties;
+
+      map.getCanvas().style.cursor = 'pointer';
+      popup.setLngLat(e.lngLat)
+        .setHTML("Road Name: " + hoverLayer.DECLARED_R)
+        .addTo(map);
+        
+              hoveredId = e.features[0].id;
+      hoverMode(hoveredId, true)
+    })
+
+//update global variables, change clicked features state, change title, update chart, trigger flyto in summary map
+    map.on('click', layer, function(e) {
+      //get the feature clicked
+      var clickedLayer = e.features[0].properties;
+      road_name = clickedLayer.DECLARED_R;
+      clickedFeature = e.features[0].properties.HMGNS_FLOW;
+
+//if a feature has already been clicked, restore its feature state
+      if (clickedId) {
+        hoverMode(clickedId, false)
+      }
+      //highlight the clicked feature
+      clickedId = e.features[0].id;
+      hoverMode(clickedId, true)
+
+      updateChart()
+
+      document.getElementById('road-name').innerHTML = road_name;
+
+      //ningran
+      //console.log(summarymap.getCenter());
+      var targetLon = e.features[0].properties.MIDPNT_LON;
+      var targetLat = e.features[0].properties.MIDPNT_LAT;
+      var target = [targetLon, targetLat];
+      //console.log(target);
+      if (summarymap.getCenter() != target) {
+        summarymap.flyTo({
+          // These options control the ending camera position: centered at
+          // the target, at zoom level 9, and north up.
+          center: target,
+          zoom: 17,
+          bearing: 0,
+
+          // These options control the flight curve, making it move
+          // slowly and zoom out almost completely before starting
+          // to pan.
+          speed: 0.5, // make the flying slow
+          curve: 1, // change the speed at which it zooms out
+        });
+      };
+    })
+  } 
+
+  //add legend button
+  for (i = 0; i < interval.length; i++) {
+
+    var item = document.createElement('div');
+    var key = document.createElement('button');
+    var value = document.createElement('label');
+
+
+    key.style.backgroundColor = map_colors[i];
+    key.id = i;
+
+    key.onclick = function() {
+      if (lgdOn == this.id) {
+        filterBy()
+        lgdOn = null
+      } else {
+        var curId = parseInt(this.id)
+        var nextId = parseInt(this.id) + 1
+
+        var filterFlowLow = [">=", getLayer(), interval[curId]]
+        var filterFlowHigh = ["<", getLayer(), interval[nextId]]
+
+        if (curId < interval.length - 1) {
+          map.setFilter(getLayer(), ['all', filterDOW(), filterType(), filterDir(), filterFlowLow, filterFlowHigh])
+        } else {
+          map.setFilter(getLayer(), ['all', filterDOW(), filterType(), filterDir(), filterFlowLow])
+        }
+        lgdOn = this.id
+      }
+
+    }
+
+
+    value.innerHTML = intervalLgd[i]; //change later to range
+
+    item.appendChild(key);
+    item.appendChild(value);
+
+    buttons.appendChild(item);
+  };
+
+
+  //initialize map status
+  map.setLayoutProperty('8_00', 'visibility', 'visible')
+  filterBy();
+
+  //day of week select activity
+  document.getElementById('dow').addEventListener('change', function() {
+    filterBy()
+    if (chart_status != 0) {
+      updateChart()
+    }
+  });
+
+  //period type select activity
+  document.getElementById('type').addEventListener('change', function() {
+    filterBy()
+    if (chart_status != 0) {
+      updateChart()
+    }
+  });
+
+  //direction radio buttons activity
+  document.getElementById('group').addEventListener('change', function() {
+    filterBy()
+    alert('Please click on roads to update the chart')
+  });
+
+  //time slider change activity
+  document.getElementById('slider').addEventListener('input', function(e) {
+    //get time value
+    var h = parseInt(this.value);
+    //update slider value
+    document.getElementById('slider').value = this.value;
+    //transform to 12h format
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    var h12 = h % 12 ? h % 12 : 12;
+    //choose layer
+    var l = this.value + '_00'
+
+    for (var i = 0; i < 24; i++) {
+      var layer = i.toString() + '_00'
+      map.setLayoutProperty(layer, 'visibility', 'none')
+    }
+    //set the chosen layer to visible
+    map.setLayoutProperty(l, 'visibility', 'visible')
+
+    //update time label
+    document.getElementById('time').textContent = h12 + ampm
+    
+    //update map and chart
+    filterBy()
+    updateChart()
+  });
+})
+
+
+
+
+//below code implements chart buttons activities
+//listen to time button event
+document.getElementById('timeMode').onclick = function() {
+  //show menu if it is invisible and close it vise versa
+  if (time_field.className === 'invisible') {
+    timeMode()
+  } else {
+    time_field.className = 'invisible'
+  }
+
+//if it is not the very initial state, initialize the chart according to time mode
+  if (chart_status != 0) {
+    initTimeChart()
+  }
+}
+
+//listen to type button event
+document.getElementById('typeMode').onclick = function() {
+  //show menu or hide menu
+  if (type_field.className === 'invisible') {
+    typeMode()
+  } else {
+    type_field.className = 'invisible'
+  }
+
+//if it is not the very initial state, initialize the chart according to type mode
+  if (chart_status != 0) {
+    initTypeChart()
+  }
+}
+
+//listen to time radio event and initialize to time chart
+document.getElementById('time_type').addEventListener('change', function() {
+  initTimeChart()
+});
+
+//listen to type radio event and initialize to type chart
+document.getElementById('period_type').addEventListener('change', function() {
+  initTypeChart()
+})
+
+
+
+summarymap.on('load', function() {
+  summarymap.addSource('roadTag', {
+    "type": "vector",
+    "url": "mapbox://noraxu.d6j1uly5"
+  });
+
+  var layers = ['motorway', 'trunk', 'primary', 'secondary', 'unclassified'];
+  var colors = ['#dfc27d', '#a6611a', '#80cdc1', '#018571', '#525252'];
+  for (i = 0; i < layers.length; i++) {
+    var layer = layers[i].charAt(0).toUpperCase() + layers[i].slice(1);
+    var color = colors[i];
+    var item = document.createElement('div');
+    var key = document.createElement('span');
+    key.className = 'summarymaplegend-key';
+    key.style.backgroundColor = color;
+    var value = document.createElement('span');
+    value.innerHTML = layer;
+    item.appendChild(key);
+    item.appendChild(value);
+    summarymaplegend.appendChild(item);
+  }
+
+
+  summarymap.addLayer({ // the code for which layer and what style goes in here 
+    id: 'roadTag',
+    type: 'line',
+    source: "roadTag",
+    'source-layer': 'export-avt460',
+    paint: {
+      'line-color': {
+        property: 'highway',
+        type: 'categorical',
+        stops: [
+          [layers[0], colors[0]],
+          [layers[1], colors[1]],
+          [layers[2], colors[2]],
+          [layers[3], colors[3]]
+        ]
+      },
+      "line-width": 4
+    }
+
+  });
+});
+
+
+
+</script>
+</body>
+</html>
