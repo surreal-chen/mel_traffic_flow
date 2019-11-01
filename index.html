@@ -140,8 +140,8 @@ h1 {
 
 #chart {
   position: absolute;
-  top: 10%;
-  height: 35%;
+  top: 13%;
+  height: 32%;
   right: 0%;
   width: 33%;
 }
@@ -388,7 +388,7 @@ var time_labels = [] //to store time labels for hourly chart
 var type_labels = ['School Term', 'School Holiday', 'Public Holiday']
 var week_labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 var seven_colors = ['#543005', '#8c510a', '#a6611a', '#bf812d', '#d8b365', '#80cdc1', '#01665e'] //colors used for stacked chart
-var two_colors = ['#5ab4ac', '#d8b365'] //colors used for average chart
+var two_colors = [ '#80cdc1','#dfc27d'] //colors used for average chart
 var flow = []; //global var to store flow data
 var time_btn = document.getElementById("timeMode")
 var type_btn = document.getElementById("typeMode")
@@ -401,14 +401,14 @@ var road_name = '' //global var to store clicked road name
 //ningran
 var summarymap = new mapboxgl.Map({
   container: 'summaryMap',
-  style: 'mapbox://styles/noraxu/ck0w820gb0g3q1cmrqhwfl37h',
+  style: 'mapbox://styles/mapbox/satellite-v9',
   center: [144.94, -37.8065],
   pitch: 50, // pitch in degrees
   zoom: 16,
   maxBounds: bounds
 });
 
-//below functions used to retrieve real time value of map elements
+//below functions are used to retrive real time value of map elements
 function getLayer() {
   return document.getElementById('slider').value + '_00'
 }
@@ -509,7 +509,8 @@ function initDayChart() {
         labels: time_labels,
         datasets: [{
           label: 'hourly flow',
-          backgroundColor: two_colors[1],
+          borderColor: two_colors[1],
+          fill:false,
           data: flow
         }]
       },
@@ -562,7 +563,8 @@ function initWeekChart() {
         labels: week_labels,
         datasets: [{
           label: 'daily flow',
-          backgroundColor: two_colors[0],
+          borderColor: two_colors[0],
+          fill:false,
           data: flow,
         }]
       },
@@ -633,7 +635,7 @@ function initAvgChart() {
         wke_flow.push(avg)
       ]
     }
-    
+
     global_chart = new Chart(ctx, {
       type: 'horizontalBar',
       data: {
@@ -712,7 +714,7 @@ function initStackedChart() {
       }
     })
 
-//create a 7*3 list to store flow of each type to each day's list
+    //create a 7*3 list to store flow of each type to each day's list
     var ds = []
     for (i = 0; i < 7; i++) {
       for (j = 0; j < 3; j++) {
@@ -772,7 +774,7 @@ function initStackedChart() {
 //update day chart
 function makeDayChart() {
   flow = []
-  
+
   csv_file.then(function(data) {
     data.forEach(function(d) {
       if (d.HMGNS_FLOW == clickedFeature && d.TYPE == getPeriodType() && d.DOW == getDOW()) {
@@ -790,7 +792,7 @@ function makeDayChart() {
 function makeWeekChart() {
   var l = getLayer()
   flow = []
-  
+
   csv_file.then(function(data) {
     data.forEach(function(d) {
       if (d.HMGNS_FLOW == clickedFeature && d.TYPE == getPeriodType()) {
@@ -815,7 +817,7 @@ function makeAvgChart() {
   ]
   var wkd_flow = []
   var wke_flow = []
-  
+
   csv_file.then(function(data) {
     data.forEach(function(d) {
       if (d.HMGNS_FLOW == clickedFeature) {
@@ -975,13 +977,15 @@ map.on('load', function() {
 
       popup.remove();
 
-//if the feature has been clicked, do not restore
+
+
+      //if the feature has been clicked, do not restore
       if (hoveredId && hoveredId != clickedId) {
         hoverMode(hoveredId, false)
       }
     });
 
-//change the style of cursor to pointer, add popup and shift to hover mode when mouse moved to a feature
+    //change the style of cursor to pointer, add popup and shift to hover mode when mouse moved to a feature
     map.on('mouseenter', layer, function(e) {
       var hoverLayer = e.features[0].properties;
 
@@ -989,19 +993,19 @@ map.on('load', function() {
       popup.setLngLat(e.lngLat)
         .setHTML("Road Name: " + hoverLayer.DECLARED_R)
         .addTo(map);
-        
-              hoveredId = e.features[0].id;
+
+      hoveredId = e.features[0].id;
       hoverMode(hoveredId, true)
     })
 
-//update global variables, change clicked features state, change title, update chart, trigger flyto in summary map
+    //update global variables, change clicked features state, change title, update chart, trigger flyto in summary map
     map.on('click', layer, function(e) {
       //get the feature clicked
       var clickedLayer = e.features[0].properties;
       road_name = clickedLayer.DECLARED_R;
       clickedFeature = e.features[0].properties.HMGNS_FLOW;
 
-//if a feature has already been clicked, restore its feature state
+      //if a feature has already been clicked, restore its feature state
       if (clickedId) {
         hoverMode(clickedId, false)
       }
@@ -1013,12 +1017,11 @@ map.on('load', function() {
 
       document.getElementById('road-name').innerHTML = road_name;
 
-      //ningran
-      //console.log(summarymap.getCenter());
       var targetLon = e.features[0].properties.MIDPNT_LON;
       var targetLat = e.features[0].properties.MIDPNT_LAT;
       var target = [targetLon, targetLat];
-      //console.log(target);
+
+
       if (summarymap.getCenter() != target) {
         summarymap.flyTo({
           // These options control the ending camera position: centered at
@@ -1034,8 +1037,55 @@ map.on('load', function() {
           curve: 1, // change the speed at which it zooms out
         });
       };
+
+      //29-10-2019 to highlight in the summary map
+      var layers = ['motorway', 'trunk', 'primary', 'secondary', 'unclassified'];
+      var colors = ['#dfc27d', '#a6611a', '#80cdc1', '#018571', '#525252'];
+
+      if (!summarymap.getLayer('SummarytrafficFlow')) {
+        summarymap.addLayer({
+          id: 'SummarytrafficFlow',
+          type: 'line',
+          source: "SummarytrafficFlow",
+          'layout': {
+            'visibility': 'visible',
+            // 'line-cap': 'square'
+          },
+          paint: {
+            'line-color': ['match', ['number', ['get', 'HMGNS_FLOW']], clickedFeature, '#d8b365', '#f5f5f5'],
+
+            "line-width": 40,
+
+            'line-opacity': 0.02,
+
+          },
+          "filter": ["==", "DECLARED_R", road_name]
+        });
+        //var previousRoad = road_name;
+      } else if (summarymap.getCenter() != target) {
+        summarymap.removeLayer('SummarytrafficFlow');
+        summarymap.addLayer({
+          id: 'SummarytrafficFlow',
+          type: 'line',
+          source: "SummarytrafficFlow",
+          'layout': {
+            'visibility': 'visible',
+            // 'line-cap': 'square'
+          },
+          paint: {
+            'line-color': ['match', ['number', ['get', 'HMGNS_FLOW']], clickedFeature, '#d8b365', '#f5f5f5'],
+            "line-width": 40,
+
+            'line-opacity': 0.02
+          },
+          "filter": ["==", "DECLARED_R", road_name]
+        });
+
+      }
+
+
     })
-  } 
+  }
 
   //add legend button
   for (i = 0; i < interval.length; i++) {
@@ -1126,7 +1176,7 @@ map.on('load', function() {
 
     //update time label
     document.getElementById('time').textContent = h12 + ampm
-    
+
     //update map and chart
     filterBy()
     if (chart_status != 0) {
@@ -1148,7 +1198,7 @@ document.getElementById('timeMode').onclick = function() {
     time_field.className = 'invisible'
   }
 
-//if it is not the very initial state, initialize the chart according to time mode
+  //if it is not the very initial state, initialize the chart according to time mode
   if (chart_status != 0) {
     initTimeChart()
   }
@@ -1163,7 +1213,7 @@ document.getElementById('typeMode').onclick = function() {
     type_field.className = 'invisible'
   }
 
-//if it is not the very initial state, initialize the chart according to type mode
+  //if it is not the very initial state, initialize the chart according to type mode
   if (chart_status != 0) {
     initTypeChart()
   }
@@ -1187,6 +1237,13 @@ summarymap.on('load', function() {
     "url": "mapbox://noraxu.d6j1uly5"
   });
 
+  //29-10-2019 add source to highlight at background (summary map)
+  summarymap.addSource("SummarytrafficFlow", {
+    "type": "geojson",
+    "data": gjson_path,
+    "generateId": true
+  })
+
   var layers = ['motorway', 'trunk', 'primary', 'secondary', 'unclassified'];
   var colors = ['#dfc27d', '#a6611a', '#80cdc1', '#018571', '#525252'];
   for (i = 0; i < layers.length; i++) {
@@ -1204,7 +1261,7 @@ summarymap.on('load', function() {
   }
 
 
-  summarymap.addLayer({ // the code for which layer and what style goes in here 
+  summarymap.addLayer({
     id: 'roadTag',
     type: 'line',
     source: "roadTag",
