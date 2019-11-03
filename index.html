@@ -388,7 +388,7 @@ var time_labels = [] //to store time labels for hourly chart
 var type_labels = ['School Term', 'School Holiday', 'Public Holiday']
 var week_labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 var seven_colors = ['#543005', '#8c510a', '#a6611a', '#bf812d', '#d8b365', '#80cdc1', '#01665e'] //colors used for stacked chart
-var two_colors = [ '#80cdc1','#dfc27d'] //colors used for average chart
+var two_colors = [ '#80cdc1','#dfc27d'] //colors used for average chart and time charts
 var flow = []; //global var to store flow data
 var time_btn = document.getElementById("timeMode")
 var type_btn = document.getElementById("typeMode")
@@ -405,6 +405,7 @@ var summarymap = new mapboxgl.Map({
   center: [144.94, -37.8065],
   pitch: 50, // pitch in degrees
   zoom: 16,
+  maxZoom: 19,
   maxBounds: bounds
 });
 
@@ -1049,19 +1050,28 @@ map.on('load', function() {
           source: "SummarytrafficFlow",
           'layout': {
             'visibility': 'visible',
-            // 'line-cap': 'square'
           },
           paint: {
             'line-color': ['match', ['number', ['get', 'HMGNS_FLOW']], clickedFeature, '#c6dbef', '#f7fbff'],
 
-            "line-width": 40,
-
-            //'line-opacity': 0.02,
+            'line-width': [
+                'interpolate', ['linear'], 
+                ['zoom'],
+                10, 15,
+                11, 20,
+                12, 25,
+                13, 30,
+                14, 35,
+                15, 40,
+                16, 45,
+                17, 55,
+                18, 65 
+            ]
 
           },
           "filter": ["==", "DECLARED_R", road_name]
         },'roadTag');
-        //var previousRoad = road_name;
+
       } else if (summarymap.getCenter() != target) {
         summarymap.removeLayer('SummarytrafficFlow');
         summarymap.addLayer({
@@ -1070,13 +1080,22 @@ map.on('load', function() {
           source: "SummarytrafficFlow",
           'layout': {
             'visibility': 'visible',
-            // 'line-cap': 'square'
           },
           paint: {
             'line-color': ['match', ['number', ['get', 'HMGNS_FLOW']], clickedFeature, '#c6dbef', '#f7fbff'],
-            "line-width": 40,
-
-            //'line-opacity': 0.02
+            "line-width":  [
+                'interpolate', ['linear'], 
+                ['zoom'],
+                10, 15,
+                11, 20,
+                12, 25,
+                13, 30,
+                14, 35,
+                15, 40,
+                16, 45,
+                17, 55,
+                18, 65 
+            ]
           },
           "filter": ["==", "DECLARED_R", road_name]
         },'roadTag');
@@ -1273,7 +1292,7 @@ summarymap.on('load', function() {
           [layers[0], colors[0]],
           [layers[1], colors[1]],
           [layers[2], colors[2]],
-          //[layers[3], colors[3]]
+
         ]
       },
       "line-width": 4
