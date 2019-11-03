@@ -401,7 +401,7 @@ var road_name = '' //global var to store clicked road name
 //ningran
 var summarymap = new mapboxgl.Map({
   container: 'summaryMap',
-  style: 'mapbox://styles/mapbox/satellite-v9',
+  style: 'mapbox://styles/noraxu/ck2gyhtk91hwu1cnyksegtdgy',
   center: [144.94, -37.8065],
   pitch: 50, // pitch in degrees
   zoom: 16,
@@ -1052,15 +1052,15 @@ map.on('load', function() {
             // 'line-cap': 'square'
           },
           paint: {
-            'line-color': ['match', ['number', ['get', 'HMGNS_FLOW']], clickedFeature, '#d8b365', '#f5f5f5'],
+            'line-color': ['match', ['number', ['get', 'HMGNS_FLOW']], clickedFeature, '#c6dbef', '#f7fbff'],
 
             "line-width": 40,
 
-            'line-opacity': 0.02,
+            //'line-opacity': 0.02,
 
           },
           "filter": ["==", "DECLARED_R", road_name]
-        });
+        },'roadTag');
         //var previousRoad = road_name;
       } else if (summarymap.getCenter() != target) {
         summarymap.removeLayer('SummarytrafficFlow');
@@ -1073,16 +1073,15 @@ map.on('load', function() {
             // 'line-cap': 'square'
           },
           paint: {
-            'line-color': ['match', ['number', ['get', 'HMGNS_FLOW']], clickedFeature, '#d8b365', '#f5f5f5'],
+            'line-color': ['match', ['number', ['get', 'HMGNS_FLOW']], clickedFeature, '#c6dbef', '#f7fbff'],
             "line-width": 40,
 
-            'line-opacity': 0.02
+            //'line-opacity': 0.02
           },
           "filter": ["==", "DECLARED_R", road_name]
-        });
+        },'roadTag');
 
       }
-
 
     })
   }
@@ -1244,8 +1243,8 @@ summarymap.on('load', function() {
     "generateId": true
   })
 
-  var layers = ['motorway', 'trunk', 'primary', 'secondary', 'unclassified'];
-  var colors = ['#dfc27d', '#a6611a', '#80cdc1', '#018571', '#525252'];
+  var layers = ['motorway', 'trunk', 'primary', 'secondary'];
+  var colors = ['#dfc27d', '#a6611a', '#80cdc1', '#018571'];
   for (i = 0; i < layers.length; i++) {
     var layer = layers[i].charAt(0).toUpperCase() + layers[i].slice(1);
     var color = colors[i];
@@ -1274,7 +1273,7 @@ summarymap.on('load', function() {
           [layers[0], colors[0]],
           [layers[1], colors[1]],
           [layers[2], colors[2]],
-          [layers[3], colors[3]]
+          //[layers[3], colors[3]]
         ]
       },
       "line-width": 4
